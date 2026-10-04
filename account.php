@@ -128,6 +128,9 @@ require __DIR__ . '/inc/header.php';
             <option value="<?= (int)$c['id'] ?>" <?= (int)$acc['category_id'] === (int)$c['id'] ? 'selected' : '' ?>><?= e($c['name']) ?></option>
           <?php endforeach; ?>
         </select>
+        <?php if (!$categories): ?>
+        <span class="mini-note" style="margin-top:4px">还没有分类？到 <a class="link" href="index.php">总览页「管理分类」</a> 添加</span>
+        <?php endif; ?>
       </label>
       <div class="field">标签（点选即保存，卡片上会显示）
         <div class="tag-checks">

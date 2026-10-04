@@ -11,8 +11,8 @@ header('Content-Type: text/html; charset=utf-8');
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($adminTitle) ?> - 管理后台</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23101425'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle' fill='white' font-family='Arial'%3E%E2%88%91%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="../assets/style.css">
-<link rel="stylesheet" href="../assets/admin.css">
+<link rel="stylesheet" href="../assets/style.css?v=<?= e(APP_VERSION) ?>">
+<link rel="stylesheet" href="../assets/admin.css?v=<?= e(APP_VERSION) ?>">
 </head>
 <body class="app-body">
 <div class="shell">

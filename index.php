@@ -86,9 +86,8 @@ require __DIR__ . '/inc/header.php';
 
 <section class="section-head">
   <h2>我的账号 <span class="count-pill"><?= count($accounts) ?></span></h2>
-  <?php if ($categories): ?>
   <details class="cat-manager">
-    <summary><?= icon('balance') ?>管理分类</summary>
+    <summary><?= icon('balance') ?>管理分类<?= $categories ? '' : '（还没有分类，点这里添加）' ?></summary>
     <div class="cat-panel">
       <?php foreach ($categories as $c): ?>
       <div class="cat-row">
@@ -118,7 +117,6 @@ require __DIR__ . '/inc/header.php';
       </form>
     </div>
   </details>
-  <?php endif; ?>
 </section>
 
 <section class="grid">
