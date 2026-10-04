@@ -132,7 +132,7 @@ if ($p === 'day') {
         ];
     }
     // 当日全部流水
-    $st = $pdo->prepare("SELECT t.id, t.type, t.amount, t.note, t.occurred_at,
+    $st = $pdo->prepare("SELECT t.id, t.type, t.amount, t.occurred_at,
           a.name AS account_name, a.id AS account_id
         FROM transactions t
         JOIN accounts a ON a.id = t.account_id
@@ -252,7 +252,7 @@ require __DIR__ . '/inc/header.php';
   <?php foreach ($dayTxs as $t): $isIn = (int)$t['type'] === 1; ?>
   <a class="tx-row tx-row-plain" href="account.php?id=<?= (int)$t['account_id'] ?>">
     <span class="tx-info">
-      <b><?= $t['note'] !== '' ? e($t['note']) : '无备注' ?></b>
+      <b class="<?= $isIn ? 'tag-in' : 'tag-out' ?>"><?= $isIn ? '收入' : '支出' ?></b>
       <i><?= e($t['account_name']) ?></i>
     </span>
     <span class="tx-amt <?= $isIn ? 'c-up' : 'c-down' ?>"><?= $isIn ? '+' : '−' ?><?= money($t['amount']) ?></span>

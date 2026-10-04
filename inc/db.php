@@ -49,4 +49,15 @@ function ensure_schema(): void
             db()->exec($stmt);
         }
     }
+
+    // v2.0 增量迁移：为存量库的 accounts 表补 category_id / tags 列
+    if (in_array('accounts', $existing, true)) {
+        $cols = db()->query('SHOW COLUMNS FROM accounts')->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('category_id', $cols, true)) {
+            db()->exec('ALTER TABLE accounts ADD COLUMN category_id INT UNSIGNED NULL DEFAULT NULL COMMENT \'分类ID\' AFTER remark, ADD KEY idx_category (category_id)');
+        }
+        if (!in_array('tags', $cols, true)) {
+            db()->exec("ALTER TABLE accounts ADD COLUMN tags VARCHAR(100) NOT NULL DEFAULT '' COMMENT '标签CSV' AFTER category_id");
+        }
+    }
 }

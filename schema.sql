@@ -33,15 +33,29 @@ CREATE TABLE IF NOT EXISTS reg_log (
   UNIQUE KEY uk_ip_date (ip, reg_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 收支账号分类（用户自定义）
+CREATE TABLE IF NOT EXISTS categories (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id INT UNSIGNED NOT NULL COMMENT '所属用户',
+  name VARCHAR(50) NOT NULL COMMENT '分类名称',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_user_name (user_id, name),
+  KEY idx_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- 收支账号表（用户自定义的账号，如微信钱包、支付宝、银行卡）
 CREATE TABLE IF NOT EXISTS accounts (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id INT UNSIGNED NOT NULL COMMENT '所属用户',
   name VARCHAR(50) NOT NULL COMMENT '账号名称',
-  remark VARCHAR(100) NOT NULL DEFAULT '' COMMENT '备注',
+  remark VARCHAR(100) NOT NULL DEFAULT '' COMMENT '备注（v2.0 起废弃，仅保留字段）',
+  category_id INT UNSIGNED NULL DEFAULT NULL COMMENT '分类ID（categories.id，NULL=未分类）',
+  tags VARCHAR(100) NOT NULL DEFAULT '' COMMENT '标签集合（CSV，可选值见 account_tags()）',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (id),
-  KEY idx_user (user_id)
+  KEY idx_user (user_id),
+  KEY idx_category (category_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 收支流水表

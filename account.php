@@ -3,13 +3,21 @@ require __DIR__ . '/init.php';
 $user = require_login();
 
 $id = (int)($_GET['id'] ?? 0);
-$st = db()->prepare('SELECT id, name, remark, created_at FROM accounts WHERE id = ? AND user_id = ?');
+$st = db()->prepare("SELECT a.id, a.name, a.category_id, a.tags, a.created_at, c.name AS category_name
+  FROM accounts a
+  LEFT JOIN categories c ON c.id = a.category_id
+  WHERE a.id = ? AND a.user_id = ?");
 $st->execute([$id, $user['id']]);
 $acc = $st->fetch();
 if (!$acc) {
     flash('error', '账号不存在或已被删除');
     redirect('index.php');
 }
+
+// 我的分类（供设置卡下拉）
+$st = db()->prepare('SELECT id, name FROM categories WHERE user_id = ? ORDER BY id ASC');
+$st->execute([$user['id']]);
+$categories = $st->fetchAll();
 
 // 该账号小计
 $st = db()->prepare("SELECT COALESCE(SUM(CASE WHEN type = 1 THEN amount END), 0) AS income,
@@ -31,7 +39,7 @@ if ($page > $pages) {
     $page = $pages;
 }
 
-$st = db()->prepare('SELECT id, type, amount, note, occurred_at
+$st = db()->prepare('SELECT id, type, amount, occurred_at
   FROM transactions WHERE account_id = ? AND user_id = ?
   ORDER BY occurred_at DESC, id DESC LIMIT ? OFFSET ?');
 $st->bindValue(1, $id, PDO::PARAM_INT);
@@ -42,6 +50,7 @@ $st->execute();
 $txs = $st->fetchAll();
 
 $h = avatar_hue($acc['name']);
+$accTags = parse_tags($acc['tags']);
 $pageTitle = $acc['name'];
 $active = 'index';
 require __DIR__ . '/inc/header.php';
@@ -55,10 +64,17 @@ require __DIR__ . '/inc/header.php';
       <span class="hero-ava" style="--h: <?= $h ?>"><?= e(mb_substr($acc['name'], 0, 1)) ?></span>
       <div class="hero-acc-title">
         <b><?= e($acc['name']) ?></b>
-        <i><?= $acc['remark'] !== '' ? e($acc['remark']) : '暂无备注' ?></i>
+        <i><?= $acc['category_name'] !== null ? e($acc['category_name']) : '未分类' ?></i>
       </div>
     </div>
-    <div class="hero-label" style="margin-top:16px">当前结余</div>
+    <?php if ($accTags): ?>
+    <div class="hero-chips" style="margin-top:12px">
+      <?php foreach ($accTags as $tg): ?>
+        <span class="chip chip-plain"><?= e($tg) ?></span>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+    <div class="hero-label" style="margin-top:14px">当前结余</div>
     <div class="hero-value" style="color: <?= $balance >= 0 ? '#6ee7b7' : '#fda4af' ?>">¥<?= money($balance) ?></div>
     <div class="hero-chips">
       <span class="chip chip-in"><?= icon('in') ?>收入 ¥<?= money($income) ?></span>
@@ -76,7 +92,7 @@ require __DIR__ . '/inc/header.php';
   </div>
 </section>
 
-<section class="form-card">
+<section class="card form-card">
   <h2><?= icon('plus') ?>记一笔</h2>
   <form method="post" action="action.php" class="tx-form">
     <?= csrf_field() ?>
@@ -93,11 +109,38 @@ require __DIR__ . '/inc/header.php';
       <label class="field">日期
         <input class="input" type="date" name="date" value="<?= e(today()) ?>" required>
       </label>
-      <label class="field field-wide">备注（可选）
-        <input class="input" name="note" maxlength="100" placeholder="如：买菜、工资">
-      </label>
     </div>
     <button class="btn" type="submit">保存记录</button>
+  </form>
+</section>
+
+<section class="card form-card">
+  <h2><?= icon('balance') ?>账号设置</h2>
+  <form method="post" action="action.php" class="props-form">
+    <?= csrf_field() ?>
+    <input type="hidden" name="action" value="save_account_props">
+    <input type="hidden" name="account_id" value="<?= (int)$acc['id'] ?>">
+    <div class="props-grid">
+      <label class="field">分类
+        <select class="input" name="category_id" onchange="this.form.submit()">
+          <option value="">未分类</option>
+          <?php foreach ($categories as $c): ?>
+            <option value="<?= (int)$c['id'] ?>" <?= (int)$acc['category_id'] === (int)$c['id'] ? 'selected' : '' ?>><?= e($c['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </label>
+      <div class="field">标签（点选即保存，卡片上会显示）
+        <div class="tag-checks">
+          <?php foreach (account_tags() as $tg): $on = in_array($tg, $accTags, true); ?>
+          <label class="tag-check <?= $on ? 'on ' . tag_class($tg) : '' ?>">
+            <input type="checkbox" name="tags[]" value="<?= e($tg) ?>" <?= $on ? 'checked' : '' ?> onchange="this.form.submit()">
+            <span><?= e($tg) ?></span>
+          </label>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    </div>
+    <noscript><button class="btn btn-sm" type="submit">保存设置</button></noscript>
   </form>
 </section>
 
@@ -119,8 +162,7 @@ require __DIR__ . '/inc/header.php';
   <div class="tx-row">
     <span class="tx-date"><b><?= date('j', $ts) ?></b><i><?= date('n月', $ts) ?></i></span>
     <span class="tx-info">
-      <b><?= $t['note'] !== '' ? e($t['note']) : '无备注' ?></b>
-      <i class="<?= $isIn ? 'tag-in' : 'tag-out' ?>"><?= $isIn ? '收入' : '支出' ?></i>
+      <b class="<?= $isIn ? 'tag-in' : 'tag-out' ?>"><?= $isIn ? '收入' : '支出' ?></b>
     </span>
     <span class="tx-amt <?= $isIn ? 'c-up' : 'c-down' ?>"><?= $isIn ? '+' : '−' ?><?= money($t['amount']) ?></span>
     <form method="post" action="action.php" data-confirm="确定删除这笔记录？" class="tx-del">

@@ -1,5 +1,5 @@
     </main>
-    <footer class="site-footer"><?= e(APP_NAME) ?> · 本地记账工具</footer>
+    <footer class="site-footer"><?= e(APP_NAME) ?> v<?= APP_VERSION ?> · 本地记账工具</footer>
   </div>
 </div>
 <script src="assets/charts.js"></script>

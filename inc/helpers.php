@@ -85,3 +85,36 @@ function avatar_hue(string $name): int
 {
     return crc32($name) % 360;
 }
+
+/** 账号可选标签（固定集合，存为 CSV） */
+function account_tags(): array
+{
+    return ['已提现', '多IP', '封优惠', '已二次', '代理'];
+}
+
+/** 标签对应的展示样式类 */
+function tag_class(string $tag): string
+{
+    return match ($tag) {
+        '已提现' => 't-1',
+        '多IP'   => 't-2',
+        '封优惠' => 't-3',
+        '已二次' => 't-4',
+        '代理'   => 't-5',
+        default  => 't-0',
+    };
+}
+
+/** 解析账号的 tags CSV 为合法标签数组 */
+function parse_tags(?string $csv): array
+{
+    $valid = account_tags();
+    $out = [];
+    foreach (explode(',', (string)$csv) as $t) {
+        $t = trim($t);
+        if ($t !== '' && in_array($t, $valid, true)) {
+            $out[] = $t;
+        }
+    }
+    return $out;
+}
