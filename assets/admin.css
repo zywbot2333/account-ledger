@@ -1,0 +1,43 @@
+/* ===== 管理后台专属样式（复用 style.css 的设计系统） ===== */
+.admin-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+.admin-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+
+.stat-ico.ico-rose { background: #fdeef3; color: #ec4899; }
+.stat-ico.ico-amber { background: #fef4e6; color: #f59e0b; }
+.stat-ico.ico-cyan { background: #e8f7fb; color: #0891b2; }
+
+.search-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.search-bar .input { max-width: 280px; }
+
+.btn-xs { padding: 4px 11px; font-size: 12px; border-radius: 8px; box-shadow: none; }
+.btn-xs.btn-ghost { color: var(--muted); }
+.btn-xs.btn-danger-ghost { box-shadow: inset 0 0 0 1px rgba(251, 113, 133, .4); }
+
+.tag {
+  display: inline-block;
+  font-size: 11.5px;
+  padding: 2px 9px;
+  border-radius: 6px;
+  background: var(--line-soft);
+  color: var(--muted);
+  font-family: Consolas, Menlo, monospace;
+}
+
+.tag-danger { background: var(--down-bg); color: var(--down); }
+
+.mini-note { font-size: 12px; color: var(--faint); }
+
+.form-card .tx-grid { max-width: 560px; }
+
+@media (max-width: 960px) {
+  .admin-stats { grid-template-columns: repeat(2, 1fr); }
+  .admin-grid2 { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,12 @@
+# 站点配置文件由安装程序生成，含数据库凭据，不入库
+config.php
+
+# 运行/测试产生的临时文件
+*.log
+.shots/
+.resp/
+.test/
+
+# 系统文件
+Thumbs.db
+.DS_Store
